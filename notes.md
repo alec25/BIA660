@@ -1,13 +1,23 @@
+# Notes
 Alec Kulakowski
+
 Commands into Anaconda Prompt:
+```
 >conda create -n chatbot python=2 #not3?
 >source activate chatbot #didn't work, source is not a command
 #some other thing here #ipaddress, msgpack-numpy,
 >conda
 >conda install -c conda-forge spacy
+```
 
 
 ~/BIA660D/pyclausie-master $
 #insert my path here
 ipython
 from pyclausie import ClausIE
+
+python
+pip freeze | grep -i ipython
+python
+from pyclausie import ClausIE
+cl = ClausIE.get_instance()
