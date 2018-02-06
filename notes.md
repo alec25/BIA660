@@ -12,9 +12,10 @@ Commands into Anaconda Prompt:
 
 
 ~/BIA660D/pyclausie-master $
-#insert my path here
+#insert my path here #it worked
 ipython
 from pyclausie import ClausIE
+
 
 python
 pip freeze | grep -i ipython
