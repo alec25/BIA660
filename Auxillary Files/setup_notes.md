@@ -44,5 +44,9 @@ SyntaxError: invalid syntax
 ```
 
 ## Actions done not mentioned by teacher:
-#Downloads\pyclausie-master\pyclausie-master
+```{Anaconda Prompt}
 conda install -c anaconda setuptools
+conda install -c spacy spacy
+```
+Pyclausie location:
+Downloads\pyclausie-master\pyclausie-master
