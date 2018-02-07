@@ -6,3 +6,4 @@ Stevens Institute of Technology
 ### About
 
 This is a GitHub repository for data and files used in Web Analytics.
+
