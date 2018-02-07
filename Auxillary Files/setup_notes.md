@@ -39,7 +39,7 @@ ImportError: No module called pyclausie
 ```
 ```{Anaconda Prompt}
 (base) C:\Users\usr>python
->>> from pyclausie import ClausIE
+>>> from pyclausie import ClausIE 
 SyntaxError: invalid syntax
 ```
 ### As posted in the Slack
@@ -55,6 +55,9 @@ conda install -c conda-forge spacy
 conda install -c anaconda setuptools
 conda install -c spacy spacy
 activate chatbot
+python
+from pyclausie import ClausIE
+cl = ClausIE.get_instance() # never completes, and causes errors #still not working, even in ipython 
 ```
 Pyclausie location:
 Downloads\pyclausie-master\pyclausie-master
