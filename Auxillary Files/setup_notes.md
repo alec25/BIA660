@@ -19,8 +19,8 @@ Commands into Anaconda Prompt:
 ```{Anaconda Prompt}
 ipython
 from pyclausie import ClausIE
+# NOW this works 
 ```
-
 ```{Anaconda Prompt}
 python
 pip freeze | grep -i ipython
@@ -47,6 +47,7 @@ SyntaxError: invalid syntax
 ```{Anaconda Prompt}
 conda install -c anaconda setuptools
 conda install -c spacy spacy
+activate chatbot
 ```
 Pyclausie location:
 Downloads\pyclausie-master\pyclausie-master
