@@ -42,6 +42,6 @@ ImportError: No module called pyclausie
 SyntaxError: invalid syntax
 ```
 
-note:
+## Actions done not mentioned by teacher:
 #Downloads\pyclausie-master\pyclausie-master
 conda install -c anaconda setuptools
