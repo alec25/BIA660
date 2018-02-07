@@ -42,6 +42,13 @@ ImportError: No module called pyclausie
 >>> from pyclausie import ClausIE
 SyntaxError: invalid syntax
 ```
+### As posted in the Slack
+```{Anaconda Prompt}
+conda create -n chatbot python=2
+source activate chatbot
+anaconda search -t conda spacy
+conda install -c conda-forge spacy
+```
 
 ## Actions done not mentioned by teacher:
 ```{Anaconda Prompt}
