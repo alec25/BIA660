@@ -10,22 +10,23 @@ Commands into Anaconda Prompt:
 >conda install -c conda-forge spacy
 ```
 
-
-
-
-
+```
 ~/BIA660D/pyclausie-master $
-#insert my path here #it worked
+#insert my path here
+```
+^^ this worked
+```
 ipython
 from pyclausie import ClausIE
+```
 
-
-
+```
 python
 pip freeze | grep -i ipython
 python
 from pyclausie import ClausIE
 cl = ClausIE.get_instance()
+```
 
 ## Issues
 
