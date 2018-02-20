@@ -1,12 +1,13 @@
-# assignment 01
+# Taken from https://github.com/zacwentzell/BIA660D
 from __future__ import print_function
-from pyclausie import ClausIE
-# re
 import re
-re_spaces = re.compile(r'\s+') # Create RegEx object looking for strings?
-# spacy
 import spacy
-nlp = spacy.load('en') # Loads the english model
+
+from pyclausie import ClausIE
+
+
+nlp = spacy.load('en')
+re_spaces = re.compile(r'\s+')
 
 
 class Person(object):
@@ -16,7 +17,7 @@ class Person(object):
         :type name: basestring
         :param likes: (Optional) an initial list of likes
         :type likes: list
-        :param dislikes: (Optional) an initial list of likes
+        :param dislikes: (Optional) an initial list of dislikes ???
         :type dislikes: list
         :param has: (Optional) an initial list of things the person has
         :type has: list
@@ -27,78 +28,89 @@ class Person(object):
         self.likes = [] if likes is None else likes
         self.has = [] if has is None else has
         self.travels = [] if travels is None else travels
+
     def __repr__(self):
         return self.name
+
 
 class Pet(object):
     def __init__(self, pet_type, name=None):
         self.name = name
         self.type = pet_type
-    def __repr__(self):
-        return self.type
+
 
 class Trip(object):
     def __init__(self):
         self.departs_on = None
         self.departs_to = None
-    def __repr__(self):
-        return self.departs_to
 
 
-# initialize persons, pets, trips lists
 persons = []
 pets = []
 trips = []
 
-# Data input function
-def process_data_from_input_file(file_path = 'Assignment_01/assignment_01.data'): #infile = open("./assignment_01.data")
-    """
-    :param file_path: path from which to read the input data
-    :type file_path: string path to .txt or .data file
-    :return: cleaned lines from input file
-    :rtype: list
-    """
+
+def get_data_from_file(file_path='./chatbot_data.txt'):
     with open(file_path) as infile:
-        cleaned_lines = [line.strip() for line in infile if not (line.startswith(('$$$', '###', '===')) or line =="\n")]
+        cleaned_lines = [line.strip() for line in infile if not line.startswith(('$$$', '###', '==='))]
+
     return cleaned_lines
 
-# Answer retrieval functions
-def select_person(name): #Selects a person from the list
+
+def select_person(name):
     for person in persons:
         if person.name == name:
             return person
-def add_person(name): #Adds a person to the list, returns it
+
+
+def add_person(name):
     person = select_person(name)
+
     if person is None:
         new_person = Person(name)
         persons.append(new_person)
+
         return new_person
+
     return person
-def select_pet(name): #Selects a pet from the list
+
+
+def select_pet(name):
     for pet in pets:
         if pet.name == name:
             return pet
-def add_pet(type, name=None): #Adds a new pet to the list, returns it
+
+
+def add_pet(type, name=None):
     pet = None
+
     if name:
         pet = select_pet(name)
+
     if pet is None:
         pet = Pet(type, name)
         pets.append(pet)
+
     return pet
-def get_persons_pet(person_name): #Selects a persons' pet from the list
+
+
+def get_persons_pet(person_name):
+
     person = select_person(person_name)
+
     for thing in person.has:
         if isinstance(thing, Pet):
             return thing
 
-# Relation triplet
+
+
 def process_relation_triplet(triplet):
     """
     Process a relation triplet found by ClausIE and store the data
+
     find relations of types:
     (PERSON, likes, PERSON)
-    (PERSON, has, PET) #done
+    (PERSON, has, PET)
     (PET, has_name, NAME)
     (PERSON, travels, TRIP)
     (TRIP, departs_on, DATE)
@@ -109,15 +121,20 @@ def process_relation_triplet(triplet):
     :return: a triplet in the formats specified above
     :rtype: tuple
     """
-    #triplet = cl.extract_triples(["Bob has a dog named Fido."])[0]
+
     sentence = triplet.subject + ' ' + triplet.predicate + ' ' + triplet.object
+
     doc = nlp(unicode(sentence))
+
     for t in doc:
         if t.pos_ == 'VERB' and t.head == t:
             root = t
         # elif t.pos_ == 'NOUN'
+
     # also, if only one sentence
     # root = doc[:].root
+
+
     """
     CURRENT ASSUMPTIONS:
     - People's names are unique (i.e. there only exists one person with a certain name).
@@ -126,6 +143,8 @@ def process_relation_triplet(triplet):
     - Only one person can own a specific pet
     - A person can own only one pet
     """
+
+
     # Process (PERSON, likes, PERSON) relations
     if root.lemma_ == 'like':
         if triplet.subject in [e.text for e in doc.ents if e.label_ == 'PERSON'] and triplet.object in [e.text for e in doc.ents if e.label_ == 'PERSON']:
@@ -145,19 +164,6 @@ def process_relation_triplet(triplet):
             s.likes.append(o)
             o.likes.append(s)
 
-    # Process (PERSON, has, PET)
-    if root.lemma_ == 'have' and ('dog' in triplet.object or 'cat' in triplet.object): #################################3
-        obj_span = doc.char_span(sentence.find(triplet.object), len(sentence))
-        pet_type = 'dog' if 'dog' in triplet.object else 'cat' #is it a dog or a cat?
-        person = add_person(triplet.subject)
-        if any([word.pos_ == 'PROPN' for word in obj_span]):
-            #[n if obj_span[n].pos_ == 'PROPN' for n in range(len(obj_span))]
-            pet_name = [word.text for word in obj_span if word.pos_ == 'PROPN'][0]
-            pet = add_pet(pet_type, name = str(pet_name))
-            person.has.append(pet)
-        else:
-            pet = add_pet(pet_type)
-            person.has.append(pet)
 
     # Process (PET, has, NAME)
     if triplet.subject.endswith('name') and ('dog' in triplet.subject or 'cat' in triplet.subject):
@@ -171,7 +177,7 @@ def process_relation_triplet(triplet):
 
             s_people = [token.text for token in subj_doc if token.ent_type_ == 'PERSON']
             assert len(s_people) == 1
-            s_person = add_person(s_people[0]) #was: select_person
+            s_person = select_person(s_people[0])
 
             s_pet_type = 'dog' if 'dog' in triplet.subject else 'cat'
 
@@ -179,31 +185,42 @@ def process_relation_triplet(triplet):
 
             s_person.has.append(pet)
 
+
 def preprocess_question(question):
     # remove articles: a, an, the
+
     q_words = question.split(' ')
+
     # when won't this work?
-    for article in ('a', 'an', 'the'): #Removes each of these
+    for article in ('a', 'an', 'the'):
         try:
             q_words.remove(article)
         except:
             pass
+
     return re.sub(re_spaces, ' ', ' '.join(q_words))
-def has_question_word(string): # Returns True if the string has a question word
+
+
+def has_question_word(string):
     # note: there are other question words
-    for qword in ('who', 'what', 'does', 'when'): #('who', 'what')
+    for qword in ('who', 'what'):
         if qword in string.lower():
             return True
+
     return False
+
 def answer_question():
-    answer = 'answer' #wtf is this
+    answer = 'answer'
     return answer
 
 
-def main()
-    input_data = process_data_from_input_file() #get input data
-    cl = ClausIE.get_instance() #setup the NLP thing
-    triples = cl.extract_triples(input_data) #turn the input data into some triples
+
+def main():
+    sents = get_data_from_file()
+
+    cl = ClausIE.get_instance()
+
+    triples = cl.extract_triples(sents)
 
     for t in triples:
         r = process_relation_triplet(t)
@@ -212,6 +229,7 @@ def main()
     question = ' '
     while question[-1] != '?':
         question = raw_input("Please enter your question: ")
+
         if question[-1] != '?':
             print('This is not a question... please try again')
 
@@ -228,10 +246,5 @@ def main()
                 print(answer.format(person.name, 'dog', pet.name))
 
 
-
 if __name__ == '__main__':
-   main()
-
-
-
-
+    main()
