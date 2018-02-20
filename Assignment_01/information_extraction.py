@@ -8,7 +8,6 @@ re_spaces = re.compile(r'\s+') # Create RegEx object looking for strings?
 import spacy
 nlp = spacy.load('en') # Loads the english model
 
-
 class Person(object):
     def __init__(self, name, likes=None, has=None, travels=None):
         """
@@ -29,13 +28,28 @@ class Person(object):
         self.travels = [] if travels is None else travels
     def __repr__(self):
         return self.name
+    def addPet(self, petType, petName=None):
+        for index in range(len(self.has)):
+            if str(type(self.has[index])) == "<class 'Pet'>" and self.has[index].type == petType:
+                if petName != None:
+                    self.has[index].name = petName
+                return self.has[index]
+        pet = add_pet(petType, petName)
+        self.has.append(pet)
+        return pet
+
+
+
 
 class Pet(object):
     def __init__(self, pet_type, name=None):
         self.name = name
         self.type = pet_type
     def __repr__(self):
-        return self.type
+        if(self.name == None):
+            return self.type
+        else:
+            return self.type + ": " + self.name
 
 class Trip(object):
     def __init__(self):
