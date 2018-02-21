@@ -31,8 +31,10 @@ class Person(object):
     def addPet(self, petType, petName=None):
         for index in range(len(self.has)):
             if str(type(self.has[index])) == "<class 'Pet'>" and self.has[index].type == petType:
-                if petName != None:
-                    self.has[index].name = petName
+                if (self.has[index].name is None) and (petName != None):
+                    pet = name_pet(petType, petName)
+                    # self.has[index].name = petName
+                    self.has[index] = pet
                 return self.has[index]
         pet = add_pet(petType, petName)
         self.has.append(pet)
@@ -58,7 +60,6 @@ class Trip(object):
     def __repr__(self):
         return self.departs_to
 
-
 # initialize persons, pets, trips lists
 persons = []
 pets = []
@@ -75,7 +76,6 @@ def process_data_from_input_file(file_path = 'Assignment_01/assignment_01.data')
     with open(file_path) as infile:
         cleaned_lines = [line.strip() for line in infile if not (line.startswith(('$$$', '###', '===')) or line =="\n")]
     return cleaned_lines
-
 # Answer retrieval functions
 def select_person(name): #Selects a person from the list
     for person in persons:
@@ -100,11 +100,31 @@ def add_pet(type, name=None): #Adds a new pet to the list, returns it
         pet = Pet(type, name)
         pets.append(pet)
     return pet
-def get_persons_pet(person_name): #Selects a persons' pet from the list
+def name_pet(type, name): #Renames a previously unnamed pet of a certain type
+    for index in range(len(pets)):
+        if pets[index].type == type and pets[index].name is None:
+            pets[index].name = name
+            return pets[index]
+def get_persons_pets(person_name): #Selects a persons' pet from the list
     person = select_person(person_name)
     for thing in person.has:
-        if isinstance(thing, Pet):
-            return thing
+        return [thing for thing in person.has if isinstance(thing, Pet)]
+def get_persons_dog(person_name):
+    person_pets = get_persons_pets(person_name)
+    if person_pets and [animal for animal in person_pets if animal.type == 'dog']:
+        return [animal for animal in person_pets if animal.type == 'dog'][0]
+def get_persons_cat(person_name):
+    person_pets = get_persons_pets(person_name)
+    if person_pets and [animal for animal in person_pets if animal.type == 'cat']:
+        return [animal for animal in person_pets if animal.type == 'cat'][0]
+# def get_persons_pet(person_name): #Selects a persons' pet from the list
+#     person = select_person(person_name)
+#     for thing in person.has:
+#         if isinstance(thing, Pet):
+#             return thing
+def get_persons_destinations(person_name):
+    person = select_person(person_name)
+    for thing in
 
 # Relation triplet
 def process_relation_triplet(triplet):
@@ -130,8 +150,7 @@ def process_relation_triplet(triplet):
         if t.pos_ == 'VERB' and t.head == t:
             root = t
         # elif t.pos_ == 'NOUN'
-    # also, if only one sentence
-    # root = doc[:].root
+    # also, if only one sentence # root = doc[:].root
     """
     CURRENT ASSUMPTIONS:
     - People's names are unique (i.e. there only exists one person with a certain name).
@@ -140,6 +159,8 @@ def process_relation_triplet(triplet):
     - Only one person can own a specific pet
     - A person can own only one pet
     """
+    subj_span = doc.char_span(sentence.find(triplet.subject), len(triplet.subject)) #Sentence subject span
+    obj_span = doc.char_span(sentence.find(triplet.object), len(sentence)) #Sentence object span
     # Process (PERSON, likes, PERSON) relations
     if root.lemma_ == 'like':
         if triplet.subject in [e.text for e in doc.ents if e.label_ == 'PERSON'] and triplet.object in [e.text for e in doc.ents if e.label_ == 'PERSON']:
@@ -159,22 +180,30 @@ def process_relation_triplet(triplet):
             s.likes.append(o)
             o.likes.append(s)
 
+    # Process (PET.name)
+    if root.lemma_ == 'be' and 'name' in triplet.subject and ('dog' in triplet.subject or 'cat' in triplet.subject):
+        pet_type = 'dog' if 'dog' in triplet.subject else 'cat' #is it a dog or a cat?
+        person_name = [word.text for word in subj_span if word.pos_ == 'PROPN'][0]
+        person = add_person(person_name)
+        # pet_name = triplet.object
+        pet_name = ' '.join([word.text for word in obj_span if word.pos_ == 'PROPN']) # MAYBE REMOVE THIS, MRS. BINGLESWORTH
+        person.addPet(petType = pet_type, petName = pet_name)
     # Process (PERSON, has, PET)
     if root.lemma_ == 'have' and ('dog' in triplet.object or 'cat' in triplet.object): #################################3
-        obj_span = doc.char_span(sentence.find(triplet.object), len(sentence))
         pet_type = 'dog' if 'dog' in triplet.object else 'cat' #is it a dog or a cat?
-        person = add_person(triplet.subject)
+        person = add_person(triplet.subject) #################
         if any([word.pos_ == 'PROPN' for word in obj_span]):
             #[n if obj_span[n].pos_ == 'PROPN' for n in range(len(obj_span))]
             pet_name = [word.text for word in obj_span if word.pos_ == 'PROPN'][0]
-            pet = add_pet(pet_type, name = str(pet_name))
-            person.has.append(pet)
-        else:
-            pet = add_pet(pet_type)
-            person.has.append(pet)
-
+            person.addPet(petType = pet_type, petName = str(pet_name))
+            # pet = add_pet(pet_type, name = str(pet_name))
+            # person.has.append(pet)
+        else: #no name given
+            person.addPet(pet_type)
+            # pet = add_pet(pet_type)
+            # person.has.append(pet)
     # Process (PET, has, NAME)
-    if triplet.subject.endswith('name') and ('dog' in triplet.subject or 'cat' in triplet.subject):
+    if triplet.subject.endswith('name') and ('dog' in triplet.subject or 'cat' in triplet.subject): #this one isnt mine
         obj_span = doc.char_span(sentence.find(triplet.object), len(sentence))
 
         # handle single names, but what about compound names? Noun chunks might help.
@@ -190,8 +219,14 @@ def process_relation_triplet(triplet):
             s_pet_type = 'dog' if 'dog' in triplet.subject else 'cat'
 
             pet = add_pet(s_pet_type, name)
+            person.addPet(petType = s_pet_type, petName = str(name))
 
-            s_person.has.append(pet)
+            # s_person.has.append(pet)
+
+    # Process (PERSON, travels, TRIP)
+    if root.lemma_ in ['go', 'fly'] and
+    # Process (TRIP, departs_on, DATE)
+    # Process (TRIP, departs_to, PLACE)
 
 def preprocess_question(question):
     # remove articles: a, an, the
@@ -209,43 +244,119 @@ def has_question_word(string): # Returns True if the string has a question word
         if qword in string.lower():
             return True
     return False
-def answer_question():
+# Data setup and processing
+def load_data():
+    input_data = process_data_from_input_file()  # get input data
+    cl = ClausIE.get_instance()  # setup the NLP thing
+    triples = cl.extract_triples(input_data)  # turn the input data into some triples
+    return cl, triples
+def process_data(raw_triples):
+    for t in raw_triples:
+        try: r = process_relation_triplet(t)
+        except: pass
+
+#Main function!
+def answer_question(question): #this is key
+    # Turn question into a triple
+    q_trip = cl.extract_triples([preprocess_question(question)])[0]
+    sentence = q_trip.subject + ' ' + q_trip.predicate + ' ' + q_trip.object
+    doc = nlp(unicode(sentence))
+    for t in doc:
+        if t.pos_ == 'VERB' and t.head == t:
+            root = t
+    # Answers for different questions:
+    # (WHO, has, PET)
+    if q_trip.subject.lower() == 'who' and root.lemma_ == 'have': #DONE!
+        answer = '{} has a {} named {}.'
+        if q_trip.object == 'dog':
+            for person in persons:
+                pet = get_persons_dog(person.name)
+                if pet:
+                    print(answer.format(person.name, 'dog', pet.name))
+        elif q_trip.object == 'cat':
+            for person in persons:
+                pet = get_persons_cat(person.name)
+                if pet:
+                    print(answer.format(person.name, 'cat', pet.name))
+    # (WHO, going to, PLACE)
+    if q_trip.subject.lower() == 'who' and root.lemma_ in ['go', 'fly']:
+        answer = '{} ' + q_trip.predicate + ' ' + q_trip.object
+        for
+        print(answer.format(NAMEHERE, root, ))
+
     answer = 'answer' #wtf is this
     return answer
 
-
-def main()
-    input_data = process_data_from_input_file() #get input data
-    cl = ClausIE.get_instance() #setup the NLP thing
-    triples = cl.extract_triples(input_data) #turn the input data into some triples
-
-    for t in triples:
-        r = process_relation_triplet(t)
-        # print(r)
+#main()
+def main():
+    # input_data = process_data_from_input_file() #get input data
+    # cl = ClausIE.get_instance() #setup the NLP thing
+    # triples = cl.extract_triples(input_data) #turn the input data into some triples
+    # for t in triples:
+    #     try: r = process_relation_triplet(t)
+    #     except: pass
+    cl, triples = load_data()
+    process_data(triples)
 
     question = ' '
     while question[-1] != '?':
         question = raw_input("Please enter your question: ")
         if question[-1] != '?':
             print('This is not a question... please try again')
+    answer_question(question)
+    return 1
 
-    q_trip = cl.extract_triples([preprocess_question(question)])[0]
+#__main__ function \/ \/
+# if __name__ == '__main__':
+#    main()
+#__main__ function /\ /\
+def check_pets():
+    print(persons)
+    for person in persons:
+        print(person, end = ":")
+        pet = get_persons_pets(person.name)
+        print(pet, end = "; ")
+        print(person.has)
+def check_span(theSpan):
+    for word in theSpan:
+        print(word, end = ": ")
+        print(word.pos_)
+def setup_test(): #15, 8
+    triplet = triples[17]  # Joe 's cat 's name is Mr. Binglesworth
+    sentence = triplet.subject + ' ' + triplet.predicate + ' ' + triplet.object
+    doc = nlp(unicode(sentence))
+    for t in doc:
+        if t.pos_ == 'VERB' and t.head == t:
+            root = t
+    subj_span = doc.char_span(sentence.find(triplet.subject), len(triplet.subject))  # Sentence subject span
+    obj_span = doc.char_span(sentence.find(triplet.object), len(sentence))  # Sentence object span
+"""
+Helpful data: 
 
-    # (WHO, has, PET)
-    # here's one just for dogs
-    if q_trip.subject.lower() == 'who' and q_trip.object == 'dog':
-        answer = '{} has a {} named {}.'
+question = "Who is traveling to Japan?"
 
-        for person in persons:
-            pet = get_persons_pet(person.name)
-            if pet and pet.type == 'dog':
-                print(answer.format(person.name, 'dog', pet.name))
+for word in doc: 
+    print(word, end = ": ")
+    print(word.pos_, end = ", ") #PROPN, 
+    print(word.head, end = ", ")) #? 
+    print()
 
+"""
+#TODO: REMOVE!!!
+cl, triples = load_data()
+process_data(triples)
+"""
+Functions useful for testing: 
+dir(object)
 
+Doc objects made up of Token objects (words)
+Doc object: 
+doc.ents 
 
-if __name__ == '__main__':
-   main()
+Token objects: 
+word.pos_ #PROPN, VERB, ADJ, NOUN, ADP
+word.head_
+word.text
 
-
-
-
+ALT-Shift-E: Run selected code in Python Console 
+"""
