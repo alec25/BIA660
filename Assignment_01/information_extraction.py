@@ -35,13 +35,24 @@ class Person(object):
                     pet = name_pet(petType, petName)
                     # self.has[index].name = petName
                     self.has[index] = pet
-                return self.has[index]
+                return self.has[index] #should this return?
         pet = add_pet(petType, petName)
         self.has.append(pet)
-        return pet
+        return pet #should this return?
     def addTrip(self, tripTo = None, tripOn = None):
+        for travel in self.travels:
+            if tripOn and travel.departs_on == tripOn:
+                if tripTo:
+                    travel.departs_to = tripTo
+                return travel
+            if tripTo and travel.departs_to == tripTo:
+                if tripOn:
+                    travel.departs_on = tripOn
+                return travel
+        trip = add_trip(departs_on = tripOn, departs_to = tripTo)
+        self.travels.append(trip) #?
         #do this
-        return None #REMOVE
+        return trip #REMOVE
 
 
 
@@ -56,16 +67,15 @@ class Pet(object):
         else:
             return self.type + ": " + self.name
 class Trip(object):
-    def __init__(self):
-        self.departs_on = None
-        self.departs_to = None
+    def __init__(self, departs_on=None, departs_to=None):
+        self.departs_on = departs_on
+        self.departs_to = departs_to
     def __repr__(self):
         if self.departs_to:
             if self.departs_on:
                 return self.departs_to + " (" + self.departs_on + ")"
             return "(" + self.departs_to + ")"
         return self.departs_on #should these all be str()?s?
-
 # initialize persons, pets, trips lists
 persons = []
 pets = []
@@ -122,15 +132,28 @@ def get_persons_cat(person_name):
     person_pets = get_persons_pets(person_name)
     if person_pets and [animal for animal in person_pets if animal.type == 'cat']:
         return [animal for animal in person_pets if animal.type == 'cat'][0]
+def select_trip(departs_on=None, departs_to=None):
+    for trip in trips:
+        if trip.departs_on == departs_on and trip.departs_to == departs_to:
+            return trip
+def add_trip(departs_on=None, departs_to=None):
+    trip = select_trip(departs_on=departs_on, departs_to=departs_to)
+    if trip is None:
+        trip = Trip(departs_on=departs_on, departs_to=departs_to)
+        trips.append(trip)
+    return trip
+def get_persons_trips(person_name):
+    person = select_person(person_name)
+    return [trip for trip in person.travels if isinstance(trip, Trip)]
 # def get_persons_pet(person_name): #Selects a persons' pet from the list
 #     person = select_person(person_name)
 #     for thing in person.has:
 #         if isinstance(thing, Pet):
 #             return thing
 def get_persons_destinations(person_name):
-    person = select_person(person_name)
-    # for thing in
-    #for trip in person.travels: #...
+    t_trips = get_persons_trips(person_name)
+    return [trip.departs_to for trip in t_trips]
+
 
 # Relation triplet
 def process_relation_triplet(triplet):
@@ -202,12 +225,8 @@ def process_relation_triplet(triplet):
             #[n if obj_span[n].pos_ == 'PROPN' for n in range(len(obj_span))]
             pet_name = [word.text for word in obj_span if word.pos_ == 'PROPN'][0]
             person.addPet(petType = pet_type, petName = str(pet_name))
-            # pet = add_pet(pet_type, name = str(pet_name))
-            # person.has.append(pet)
         else: #no name given
             person.addPet(pet_type)
-            # pet = add_pet(pet_type)
-            # person.has.append(pet)
     # Process (PET, has, NAME)
     if triplet.subject.endswith('name') and ('dog' in triplet.subject or 'cat' in triplet.subject): #this one isnt mine
         obj_span = doc.char_span(sentence.find(triplet.object), len(sentence))
@@ -228,12 +247,27 @@ def process_relation_triplet(triplet):
             person.addPet(petType = s_pet_type, petName = str(name))
 
             # s_person.has.append(pet)
-
     # Process (PERSON, travels, TRIP)
-    #if root.lemma_ in ['go', 'fly'] and
+    if root.lemma_ in ['go', 'fly', 'take', 'leave']: #and something else:
+        for person_name in [word.text for word in subj_span if word.pos_ == 'PROPN']:
+            person = add_person(person_name)
+            if [e.text for e in doc.ents if e.label_ == 'GPE']:
+                if [e.text for e in doc.ents if e.label_ == 'GPE']:
+                    destination = [e.text for e in doc.ents if e.label_ == 'GPE'][0]
+                else:
+                    destination = None
+                if [e.text for e in doc.ents if e.label_ in 'DATE']:
+                    date_time = [e.text for e in doc.ents if e.label_ in 'DATE'][0]
+                elif [e.text for e in doc.ents if e.label_ in 'TIME']:
+                    date_time = [e.text for e in doc.ents if e.label_ in 'TIME'][0]
+                else:
+                    date_time = None
+                person.addTrip(tripTo = destination, tripOn = date_time)
+
     # Process (TRIP, departs_on, DATE)
     # Process (TRIP, departs_to, PLACE)
 
+#idk about these ones
 def preprocess_question(question):
     # remove articles: a, an, the
     q_words = question.split(' ')
@@ -288,16 +322,19 @@ def answer_question(question): #this is key
                 if pet:
                     print(answer.format(person.name, 'cat', pet.name))
     # (WHO, going to, PLACE)
-    if q_trip.subject.lower() == 'who' and root.lemma_ in ['go', 'fly']:
+    elif q_trip.subject.lower() == 'who' and root.lemma_ in ['go', 'fly', 'trip', 'leave']:
         answer = '{} ' + q_trip.predicate + ' ' + q_trip.object
         #for person in q_trip.subject ?? :
             #if
         print(answer.format(NAMEHERE, root, ))
+    else:
+        print("I don't know")
 
-    answer = 'answer' #wtf is this
-    return answer
+    # answer = 'answer' #wtf is this
+    # return answer
+    return None
 
-#main()
+#main() #TODO: edit this later, complete
 def main():
     # input_data = process_data_from_input_file() #get input data
     # cl = ClausIE.get_instance() #setup the NLP thing
@@ -317,7 +354,7 @@ def main():
     print("Done")
     return 1
 
-#__main__ function \/ \/
+#__main__ function \/ \/ #TODO: finish this at the end, last step
 # if __name__ == '__main__':
 #    main()
 #__main__ function /\ /\
@@ -328,12 +365,22 @@ def check_pets():
         pet = get_persons_pets(person.name)
         print(pet, end = "; ")
         print(person.has)
+def check_trips(): #not sure if this works
+    print(persons)
+    for person in persons:
+        print(person, end = ":")
+        the_trip = get_persons_trips(person.name)
+        print(the_trip, end = "; ")
+        print(person.has)
+
 def check_span(theSpan):
     for word in theSpan:
         print(word, end = ": ")
         print(word.pos_)
-def setup_test(): #15, 8
+def setup_test(): #15, 8, #17, 16, 24,
+    triplet = triples[16]
     triplet = triples[17]  # Joe 's cat 's name is Mr. Binglesworth
+    triplet = triples[24]
     sentence = triplet.subject + ' ' + triplet.predicate + ' ' + triplet.object
     doc = nlp(unicode(sentence))
     for t in doc:
@@ -341,10 +388,12 @@ def setup_test(): #15, 8
             root = t
     subj_span = doc.char_span(sentence.find(triplet.subject), len(triplet.subject))  # Sentence subject span
     obj_span = doc.char_span(sentence.find(triplet.object), len(sentence))  # Sentence object span
+def question_test():
+    question = "Who is traveling to Japan?"
+
 """
 Helpful data: 
 
-question = "Who is traveling to Japan?"
 
 for word in doc: 
     print(word, end = ": ")
@@ -370,7 +419,7 @@ word.head_
 word.text
 word.lemma_ #traveling -> go, flying -> fly
 
-spacy.explain("LANGUAGE") # or "GPE" or "PERSON" etc. #https://spacy.io/api/annotation#section-dependency-parsing 
+spacy.explain("LANGUAGE") # or "GPE" or "PERSON" etc. #https://spacy.io/api/annotation#named-entities
 
 ALT-Shift-E: Run selected code in Python Console 
 answer_question(question)
