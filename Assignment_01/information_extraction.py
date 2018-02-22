@@ -152,7 +152,7 @@ def get_persons_destinations(person_name):
     return [trip.departs_to for trip in t_trips]
 
 
-# Relation triplet
+# Relation triplet processing
 def process_relation_triplet(triplet):
     """
     Process a relation triplet found by ClausIE and store the data
