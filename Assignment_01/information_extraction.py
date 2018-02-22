@@ -143,7 +143,7 @@ def get_persons_trips(person_name):
     person = select_person(person_name)
     return [trip for trip in person.travels if isinstance(trip, Trip)]
 # def get_persons_pet(person_name): #Selects a persons' pet from the list
-#     person = select_person(person_name)
+#     person = select_person(person_name) y
 #     for thing in person.has:
 #         if isinstance(thing, Pet):
 #             return thing
