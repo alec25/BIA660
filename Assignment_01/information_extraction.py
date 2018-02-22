@@ -39,6 +39,9 @@ class Person(object):
         pet = add_pet(petType, petName)
         self.has.append(pet)
         return pet
+    def addTrip(self, tripTo = None, tripOn = None):
+        #do this
+        return None #REMOVE
 
 
 
@@ -52,19 +55,21 @@ class Pet(object):
             return self.type
         else:
             return self.type + ": " + self.name
-
 class Trip(object):
     def __init__(self):
         self.departs_on = None
         self.departs_to = None
     def __repr__(self):
-        return self.departs_to
+        if self.departs_to:
+            if self.departs_on:
+                return self.departs_to + " (" + self.departs_on + ")"
+            return "(" + self.departs_to + ")"
+        return self.departs_on #should these all be str()?s?
 
 # initialize persons, pets, trips lists
 persons = []
 pets = []
 trips = []
-
 # Data input function
 def process_data_from_input_file(file_path = 'Assignment_01/assignment_01.data'): #infile = open("./assignment_01.data")
     """
@@ -124,7 +129,8 @@ def get_persons_cat(person_name):
 #             return thing
 def get_persons_destinations(person_name):
     person = select_person(person_name)
-    for thing in
+    # for thing in
+    #for trip in person.travels: #...
 
 # Relation triplet
 def process_relation_triplet(triplet):
@@ -224,7 +230,7 @@ def process_relation_triplet(triplet):
             # s_person.has.append(pet)
 
     # Process (PERSON, travels, TRIP)
-    if root.lemma_ in ['go', 'fly'] and
+    #if root.lemma_ in ['go', 'fly'] and
     # Process (TRIP, departs_on, DATE)
     # Process (TRIP, departs_to, PLACE)
 
@@ -249,11 +255,14 @@ def load_data():
     input_data = process_data_from_input_file()  # get input data
     cl = ClausIE.get_instance()  # setup the NLP thing
     triples = cl.extract_triples(input_data)  # turn the input data into some triples
-    return cl, triples
-def process_data(raw_triples):
-    for t in raw_triples:
+    for t in triples:
         try: r = process_relation_triplet(t)
         except: pass
+    return cl, triples
+#def process_data(raw_triples):
+ #   for t in raw_triples:
+  #      try: r = process_relation_triplet(t)
+   #     except: pass
 
 #Main function!
 def answer_question(question): #this is key
@@ -281,7 +290,8 @@ def answer_question(question): #this is key
     # (WHO, going to, PLACE)
     if q_trip.subject.lower() == 'who' and root.lemma_ in ['go', 'fly']:
         answer = '{} ' + q_trip.predicate + ' ' + q_trip.object
-        for
+        #for person in q_trip.subject ?? :
+            #if
         print(answer.format(NAMEHERE, root, ))
 
     answer = 'answer' #wtf is this
@@ -296,7 +306,7 @@ def main():
     #     try: r = process_relation_triplet(t)
     #     except: pass
     cl, triples = load_data()
-    process_data(triples)
+    # process_data(triples)
 
     question = ' '
     while question[-1] != '?':
@@ -304,6 +314,7 @@ def main():
         if question[-1] != '?':
             print('This is not a question... please try again')
     answer_question(question)
+    print("Done")
     return 1
 
 #__main__ function \/ \/
@@ -344,7 +355,7 @@ for word in doc:
 """
 #TODO: REMOVE!!!
 cl, triples = load_data()
-process_data(triples)
+# process_data(triples)
 """
 Functions useful for testing: 
 dir(object)
@@ -357,6 +368,10 @@ Token objects:
 word.pos_ #PROPN, VERB, ADJ, NOUN, ADP
 word.head_
 word.text
+word.lemma_ #traveling -> go, flying -> fly
+
+spacy.explain("LANGUAGE") # or "GPE" or "PERSON" etc. #https://spacy.io/api/annotation#section-dependency-parsing 
 
 ALT-Shift-E: Run selected code in Python Console 
+answer_question(question)
 """
