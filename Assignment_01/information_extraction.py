@@ -54,9 +54,6 @@ class Person(object):
         #do this
         return trip #REMOVE
 
-
-
-
 class Pet(object):
     def __init__(self, pet_type, name=None):
         self.name = name
@@ -248,7 +245,7 @@ def process_relation_triplet(triplet):
 
             # s_person.has.append(pet)
     # Process (PERSON, travels, TRIP)
-    if root.lemma_ in ['go', 'fly', 'take', 'leave']: #and something else:
+    if root.lemma_ in ['go', 'fly', 'take', 'leave', 'travel']: #and something else:
         for person_name in [word.text for word in subj_span if word.pos_ == 'PROPN']:
             person = add_person(person_name)
             if [e.text for e in doc.ents if e.label_ == 'GPE']:
@@ -322,9 +319,13 @@ def answer_question(question): #this is key
                 if pet:
                     print(answer.format(person.name, 'cat', pet.name))
     # (WHO, going to, PLACE)
-    elif q_trip.subject.lower() == 'who' and root.lemma_ in ['go', 'fly', 'trip', 'leave']:
+    elif q_trip.subject.lower() == 'who' and root.lemma_ in ['go', 'fly', 'trip', 'leave', 'travel']:
         answer = '{} ' + q_trip.predicate + ' ' + q_trip.object
+        for person in persons:
+            person_name =  person.name
+            if get_persons_destinations(person_name) ==
         #for person in q_trip.subject ?? :
+        #[e.text for e in doc.ents if e.label_ == 'GPE']:
             #if
         print(answer.format(NAMEHERE, root, ))
     else:
@@ -371,7 +372,7 @@ def check_trips(): #not sure if this works
         print(person, end = ":")
         the_trip = get_persons_trips(person.name)
         print(the_trip, end = "; ")
-        print(person.has)
+        print(person.travels)
 
 def check_span(theSpan):
     for word in theSpan:
@@ -390,6 +391,12 @@ def setup_test(): #15, 8, #17, 16, 24,
     obj_span = doc.char_span(sentence.find(triplet.object), len(sentence))  # Sentence object span
 def question_test():
     question = "Who is traveling to Japan?"
+    q_trip = cl.extract_triples([preprocess_question(question)])[0]
+    sentence = q_trip.subject + ' ' + q_trip.predicate + ' ' + q_trip.object
+    doc = nlp(unicode(sentence))
+    for t in doc:
+        if t.pos_ == 'VERB' and t.head == t:
+            root = t
 
 """
 Helpful data: 
