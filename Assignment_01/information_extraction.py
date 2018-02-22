@@ -320,14 +320,13 @@ def answer_question(question): #this is key
                     print(answer.format(person.name, 'cat', pet.name))
     # (WHO, going to, PLACE)
     elif q_trip.subject.lower() == 'who' and root.lemma_ in ['go', 'fly', 'trip', 'leave', 'travel']:
-        answer = '{} ' + q_trip.predicate + ' ' + q_trip.object
+        obj_span = doc.char_span(sentence.find(q_trip.object), len(sentence))  # Sentence object span
+        answer = '{} ' + q_trip.predicate + ' ' + q_trip.object + "."
         for person in persons:
-            person_name =  person.name
-            if get_persons_destinations(person_name) ==
-        #for person in q_trip.subject ?? :
-        #[e.text for e in doc.ents if e.label_ == 'GPE']:
-            #if
-        print(answer.format(NAMEHERE, root, ))
+            for q_destination in [word.text for word in doc.ents if word.label_ == 'GPE']:
+                if q_destination in get_persons_destinations(person.name):
+                    print(answer.format(person.name))
+        # print(answer.format(NAMEHERE, root, ))
     else:
         print("I don't know")
 
@@ -393,10 +392,12 @@ def question_test():
     question = "Who is traveling to Japan?"
     q_trip = cl.extract_triples([preprocess_question(question)])[0]
     sentence = q_trip.subject + ' ' + q_trip.predicate + ' ' + q_trip.object
+    #stupid line, because for the console skips the following line if you just try to run them all
     doc = nlp(unicode(sentence))
     for t in doc:
         if t.pos_ == 'VERB' and t.head == t:
             root = t
+    #another stupid line
 
 """
 Helpful data: 
