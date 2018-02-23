@@ -28,6 +28,11 @@ class Person(object):
         self.travels = [] if travels is None else travels
     def __repr__(self):
         return self.name
+    def addLike(self, person_name):
+        person = add_person(person_name)
+        if person not in self.likes:
+            self.likes.append(person)
+        return person
     def addPet(self, petType, petName=None):
         for index in range(len(self.has)):
             if str(type(self.has[index])) == "<class 'Pet'>" and self.has[index].type == petType:
@@ -142,14 +147,30 @@ def add_trip(departs_on=None, departs_to=None):
 def get_persons_trips(person_name):
     person = select_person(person_name)
     return [trip for trip in person.travels if isinstance(trip, Trip)]
-# def get_persons_pet(person_name): #Selects a persons' pet from the list
-#     person = select_person(person_name) y
-#     for thing in person.has:
-#         if isinstance(thing, Pet):
-#             return thing
 def get_persons_destinations(person_name):
     t_trips = get_persons_trips(person_name)
     return [trip.departs_to for trip in t_trips]
+def does_person_like(name_one, name_two):
+    likes = get_persons_likes(name_one)
+    person_two = add_person(name_two)
+    if person_two in likes:
+        return True
+    return False
+def define_friends(name_one, name_two):
+    if name_one in [pet.name for pet in pets]:
+        return None #does allow for people to like pets
+    person_one = add_person(name_one)
+    person_two = add_person(name_two)
+    person_one.addLike(name_two)
+    person_two.addLike(name_one)
+def get_persons_likes(person_name):
+    person = select_person(person_name)
+    return person.likes #[like for like in person.likes]
+def add_like(name_one, name_two):
+    if name_one in [pet.name for pet in pets]:
+        return None #does allow for people to like pets
+    person = add_person(name_one)
+    person.addLike(name_two)
 
 
 # Relation triplet processing
@@ -188,23 +209,33 @@ def process_relation_triplet(triplet):
     subj_span = doc.char_span(sentence.find(triplet.subject), len(triplet.subject)) #Sentence subject span
     obj_span = doc.char_span(sentence.find(triplet.object), len(sentence)) #Sentence object span
     # Process (PERSON, likes, PERSON) relations
-    if root.lemma_ == 'like':
-        if triplet.subject in [e.text for e in doc.ents if e.label_ == 'PERSON'] and triplet.object in [e.text for e in doc.ents if e.label_ == 'PERSON']:
-            s = add_person(triplet.subject)
-            o = add_person(triplet.object)
-            s.likes.append(o)
+    if root.lemma_ == 'like' and 'neg' not in [a.dep_ for a in doc[:].root.children]:
+        if triplet.subject in [e.text for e in doc.ents if e.label_ in ['PERSON', 'ORG']] and triplet.object in [e.text for e in doc.ents if e.label_ in ['PERSON', 'ORG']]:
+            # s = add_person(triplet.subject)
+            # o = add_person(triplet.object)
+            # s.likes.append(o)
+            add_like(triplet.subject, triplet.object)
+            # define_friends(triplet.subject, triplet.object) #NEW
 
-    if root.lemma_ == 'be' and triplet.object.startswith('friends with'):
-        fw_doc = nlp(unicode(triplet.object))
-        with_token = [t for t in fw_doc if t.text == 'with'][0]
-        fw_who = [t for t in with_token.children if t.dep_ == 'pobj'][0].text
+    if root.lemma_ == 'be' and ('friends' in sentence) and 'neg' not in [a.dep_ for a in doc[:].root.children]: #triplet.object.startswith('friends with')
+        #### trying new thing ### fw_doc = nlp(unicode(triplet.object))
+        # with_token = [t for t in fw_doc if t.text == 'with'][0] #this was important ?
+        #name_list = [str(i).split() for i in fw_doc.ents]
+        name_list = [str(i).split() for i in doc.ents]
+        names = []
+        for name_set in name_list:
+            names += name_set
+        name_one = names[0]
+        for name in names[1:]:
+            define_friends(name_one, name) #triplet.subject
+        # fw_who = [t for t in with_token.children if t.dep_ == 'pobj'][0].text #this was important ?
         # fw_who = [e for e in fw_doc.ents if e.label_ == 'PERSON'][0].text
 
-        if triplet.subject in [e.text for e in doc.ents if e.label_ == 'PERSON'] and fw_who in [e.text for e in doc.ents if e.label_ == 'PERSON']:
-            s = add_person(triplet.subject)
-            o = add_person(fw_who)
-            s.likes.append(o)
-            o.likes.append(s)
+        # if triplet.subject in [e.text for e in doc.ents if e.label_ == 'PERSON'] and fw_who in [e.text for e in doc.ents if e.label_ == 'PERSON']:
+        #     s = add_person(triplet.subject)
+        #     o = add_person(fw_who)
+        #     s.likes.append(o)
+        #     o.likes.append(s)
 
     # Process (PET.name)
     if root.lemma_ == 'be' and 'name' in triplet.subject and ('dog' in triplet.subject or 'cat' in triplet.subject):
@@ -326,7 +357,59 @@ def answer_question(question): #this is key
             for q_destination in [word.text for word in doc.ents if word.label_ == 'GPE']:
                 if q_destination in get_persons_destinations(person.name):
                     print(answer.format(person.name))
-        # print(answer.format(NAMEHERE, root, ))
+    # (WHEN, is, PERSON, going to, PLACE)
+    elif 'when' in sentence.lower() and root.lemma_ in ['go', 'fly', 'trip', 'leave', 'travel']: #question = "When is Sally going to Mexico?"
+        destination = [e.text for e in doc.ents if e.label_ in ['GPE']][0]
+        if destination not in get_persons_destinations(q_trip.subject):
+            print(q_trip.subject + " is not going to " + destination + ".")
+        else:
+            persons_trips = get_persons_trips(q_trip.subject) #[e.text for e in doc.ents if e.label_ in ['PERSON', 'ORG']][0]
+            for trip in persons_trips:
+                if trip.departs_to == destination:
+                    if trip.departs_on:
+                        print(q_trip.subject + " is going to " + destination + " sometime in " + trip.departs_on + ".")
+                    else:
+                        print(q_trip.subject + "'s trip to " + destination + " was not given a date.")
+    # (does, PERSON, like, PERSON)
+    elif sentence.lower().find('does') == 0 and 'like' in sentence:
+        name_one, name_two = [e.text for e in doc.ents if e.label_ in ['PERSON', 'ORG']]
+        if does_person_like(name_one=name_one, name_two=name_two):
+            print( name_one + " does like " + name_two + ".")
+        else:
+            print( name_one + " does not like " + name_two + ".")
+    # (WHO, does, PERSON, like)
+    elif sentence.lower().find('who') and 'does' in sentence and 'like' in sentence:
+        subject_name = [e.text for e in doc.ents if e.label_ in ['PERSON', 'ORG']][0]
+        likes = get_persons_likes(subject_name)
+        if len(likes) == 0:
+            print(subject_name + " doesn't have any likes!")
+        elif len(likes) == 1:
+            print(subject_name + " likes " + likes[0].name + ".")
+        elif len(likes) == 2:
+            print(subject_name + " likes " + likes[0].name + " and " + likes[1].name + ".")
+        else:
+            response = subject_name + " likes "
+            for person in likes[:-1]:
+                response += person.name + ", "
+            response += "and " + likes[-1].name + "."
+            print(response)
+    # (WHO, likes, PERSON)
+    elif 'like' in sentence:
+        names = [person.name for person in persons]
+        subject_name = [e.text for e in doc.ents if e.label_ in ['PERSON', 'ORG']][0]
+        likers = [name for name in names if does_person_like(subject_name, name)]
+        if len(likers) == 0:
+            print("Nobody likes " + subject_name + ".")
+        elif len(likers) == 1:
+            print(likers[0] + " likes " + subject_name + ".")
+        elif len(likers) == 2:
+            print(likers[0] + " and " + likers[1] + " like " + subject_name + ".")
+        else:
+            response = ""
+            for person in likers[:-1]:
+                response += person + ", "
+            response += "and " + likers[-1] + " like " + subject_name + "."
+            print(response)
     else:
         print("I don't know")
 
@@ -344,7 +427,6 @@ def main():
     #     except: pass
     cl, triples = load_data()
     # process_data(triples)
-
     question = ' '
     while question[-1] != '?':
         question = raw_input("Please enter your question: ")
@@ -372,15 +454,19 @@ def check_trips(): #not sure if this works
         the_trip = get_persons_trips(person.name)
         print(the_trip, end = "; ")
         print(person.travels)
-
+def check_likes(): #not sure if this works
+    print(persons)
+    for person in persons:
+        print(person, end = ":")
+        the_like = get_persons_likes(person.name)
+        print(the_like, end = "; ")
+        print(person.likes)
 def check_span(theSpan):
     for word in theSpan:
         print(word, end = ": ")
         print(word.pos_)
-def setup_test(): #15, 8, #17, 16, 24,
-    triplet = triples[16]
-    triplet = triples[17]  # Joe 's cat 's name is Mr. Binglesworth
-    triplet = triples[24]
+def setup_test(): #15, 8, #17, 16, 24, #0, 1, 30, #9, 19
+    triplet = triples[19]
     sentence = triplet.subject + ' ' + triplet.predicate + ' ' + triplet.object
     doc = nlp(unicode(sentence))
     for t in doc:
@@ -389,11 +475,17 @@ def setup_test(): #15, 8, #17, 16, 24,
     subj_span = doc.char_span(sentence.find(triplet.subject), len(triplet.subject))  # Sentence subject span
     obj_span = doc.char_span(sentence.find(triplet.object), len(sentence))  # Sentence object span
 def question_test():
-    question = "Who is traveling to Japan?"
+    question = "Does Joe like Mary?"
+    question = "Does Bob like Sally?"
+    question = "Who likes Sally?"
+    question = "When is Sally going to Mexico?"
     q_trip = cl.extract_triples([preprocess_question(question)])[0]
+    #stupid line, because for the console skips the following line if you just try to run them all
+    #stupid line, because for the console skips the following line if you just try to run them all
     sentence = q_trip.subject + ' ' + q_trip.predicate + ' ' + q_trip.object
     #stupid line, because for the console skips the following line if you just try to run them all
     doc = nlp(unicode(sentence))
+    #stupid line, because for the console skips the following line if you just try to run them all
     for t in doc:
         if t.pos_ == 'VERB' and t.head == t:
             root = t
