@@ -329,12 +329,16 @@ def load_data():
 #Main function!
 def answer_question(question): #this is key
     # Turn question into a triple
-    q_trip = cl.extract_triples([preprocess_question(question)])[0]
-    sentence = q_trip.subject + ' ' + q_trip.predicate + ' ' + q_trip.object
-    doc = nlp(unicode(sentence))
-    for t in doc:
-        if t.pos_ == 'VERB' and t.head == t:
-            root = t
+    try:
+        q_trip = cl.extract_triples([preprocess_question(question)])[0]
+        sentence = q_trip.subject + ' ' + q_trip.predicate + ' ' + q_trip.object
+        doc = nlp(unicode(sentence))
+        for t in doc:
+            if t.pos_ == 'VERB' and t.head == t:
+                root = t
+    except:
+        print("I don't know")
+        return None
     # Answers for different questions:
     # (WHO, has, PET)
     if q_trip.subject.lower() == 'who' and root.lemma_ == 'have': #DONE!
@@ -433,12 +437,11 @@ def main():
         if question[-1] != '?':
             print('This is not a question... please try again')
     answer_question(question)
-    print("Done")
-    return 1
+    #Done!
 
 #__main__ function \/ \/ #TODO: finish this at the end, last step
-# if __name__ == '__main__':
-#    main()
+if __name__ == '__main__':
+   main()
 #__main__ function /\ /\
 def check_pets():
     print(persons)
@@ -479,6 +482,7 @@ def question_test():
     question = "Does Bob like Sally?"
     question = "Who likes Sally?"
     question = "When is Sally going to Mexico?"
+    questoin = "What's the name of Bob's dog?"
     q_trip = cl.extract_triples([preprocess_question(question)])[0]
     #stupid line, because for the console skips the following line if you just try to run them all
     #stupid line, because for the console skips the following line if you just try to run them all
