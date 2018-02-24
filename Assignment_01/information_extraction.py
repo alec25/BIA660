@@ -245,7 +245,7 @@ def process_relation_triplet(triplet):
         # pet_name = triplet.object
         pet_name = ' '.join([word.text for word in obj_span if word.pos_ == 'PROPN']) # MAYBE REMOVE THIS, MRS. BINGLESWORTH
         person.addPet(petType = pet_type, petName = pet_name)
-    # Process (PERSON, has, PET)
+    # Process (PERSON, has  , PET)
     if root.lemma_ == 'have' and ('dog' in triplet.object or 'cat' in triplet.object): #################################3
         pet_type = 'dog' if 'dog' in triplet.object else 'cat' #is it a dog or a cat?
         person = add_person(triplet.subject) #################
