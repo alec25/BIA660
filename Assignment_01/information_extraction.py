@@ -357,10 +357,14 @@ def answer_question(question): #this is key
     elif q_trip.subject.lower() == 'who' and root.lemma_ in ['go', 'fly', 'trip', 'leave', 'travel']:
         obj_span = doc.char_span(sentence.find(q_trip.object), len(sentence))  # Sentence object span
         answer = '{} ' + q_trip.predicate + ' ' + q_trip.object + "."
+        answered = False
         for person in persons:
             for q_destination in [word.text for word in doc.ents if word.label_ == 'GPE']:
                 if q_destination in get_persons_destinations(person.name):
                     print(answer.format(person.name))
+                    answered = True
+        if not answered:
+            print(answer.format("No one"))
     # (WHEN, is, PERSON, going to, PLACE)
     elif 'when' in sentence.lower() and root.lemma_ in ['go', 'fly', 'trip', 'leave', 'travel']: #question = "When is Sally going to Mexico?"
         destination = [e.text for e in doc.ents if e.label_ in ['GPE']][0]
