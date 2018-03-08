@@ -31,16 +31,15 @@ Select(year_selector).select_by_value('2015')
 sleep(random()) # WAIT WAIT WAIT
 game_type_selector = driver.find_element_by_id('widgets').find_element_by_class_name('onscreen').find_element_by_name('st_hitting_game_type')
 game_type_selector.click()
-sleep(random()) # WAIT WAIT WAIT
+sleep(random()+0.5) # WAIT WAIT WAIT
 Select(game_type_selector).select_by_visible_text('Regular Season')
-sleep(random()) # WAIT WAIT WAIT #stats_table
-sleep(random())
-home_run_sorter = driver.find_element_by_id('datagrid').find_element_by_tag_name('thead').find_element_by_class_name('dg-hr')
-home_run_sorter.click()
+sleep(random()+0.5) # WAIT WAIT WAIT #stats_table
+# home_run_sorter = driver.find_element_by_id('datagrid').find_element_by_tag_name('thead').find_element_by_class_name('dg-hr')
+# home_run_sorter.click() #this works but it's uncessesary
 sleep(random()) # WAIT WAIT WAIT
 # team_table = driver.find_element_by_id('datagrid').find_element_by_tag_name('tbody')
 team_table = driver.find_element_by_id('datagrid').find_element_by_tag_name('table')
-table_path = team_table #TODO: remove
+# table_path = team_table #TODO: remove
 
 
 # sorted_team_data = [team.text for team in sorted_teams]
@@ -50,25 +49,32 @@ def get_table(table_path):
     table_body = table_path.find_element_by_tag_name('tbody')
     head_data = np.array([e.text for e in table_head.find_elements_by_tag_name('th')])
     data = np.array([[e.text for e in team.find_elements_by_tag_name('td')] for team in table_body.find_elements_by_tag_name('tr')])
-    while(len(head_data) > len(data[:,1:])+1): head_data = head_data[:-1] #???
-    data_frame = pd.DataFrame(data = data[:,1:], columns = head_data, index = data[:,0])
+    # while(len(head_data) > len(data[:,1:])+1): head_data = head_data[:-1] #???
+    data_frame = pd.DataFrame(data = data[:,1:], columns = head_data[1:], index = data[:,0])
+    data_frame.replace('', np.nan, inplace=True)
+    data_frame.dropna(axis=1, how='all', inplace=True)
     return data_frame
     # n_rows = len(table_path.find_elements_by_tag_name('tr'))
     # n_cols = len(table_path.find_element_by_tag_name('tr').find_elements_by_tag_name('td'))
     # for i in range(n_rows):
     #     for j in range(n_cols):
     #         element = table_path
-eee = get_table(team_table)
-print(eee)
-for team in table_path.find_elements_by_tag_name('tr'):
-    [eh.text for eh in team.find_elements_by_tag_name('td')]
+table_one = get_table(team_table)
+table_one.sort_values(by='HR', ascending=False, inplace=True)
+table_one.to_csv("Assignment_02/question01.csv")
+answer_one = table_one.iloc[0,:].loc["Team"]
 
 
-data = pd.[[e.text for e in team.find_elements_by_tag_name('td')] for team in team_table.find_elements_by_tag_name('tr')]
+# print(eee)
+# for team in table_path.find_elements_by_tag_name('tr'):
+#     [eh.text for eh in team.find_elements_by_tag_name('td')]
 
-[team for team in team_table.find_elements_by_tag_name('tr')]
-team = team_table.find_elements_by_tag_name('tr')[0]
-[''.join([eh.text for eh in team.find_elements_by_tag_name('td')]) for team in team_table.find_elements_by_tag_name('tr')]
+
+# data = pd.[[e.text for e in team.find_elements_by_tag_name('td')] for team in team_table.find_elements_by_tag_name('tr')]
+#
+# [team for team in team_table.find_elements_by_tag_name('tr')]
+# team = team_table.find_elements_by_tag_name('tr')[0]
+# [''.join([eh.text for eh in team.find_elements_by_tag_name('td')]) for team in team_table.find_elements_by_tag_name('tr')]
 # driver.close()
 
 
@@ -86,3 +92,4 @@ team = team_table.find_elements_by_tag_name('tr')[0]
 # Last thing, close driver
 # driver.close()
 
+print('Question 1: The answer is "{}"'.format(answer_one))
