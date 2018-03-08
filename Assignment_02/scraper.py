@@ -141,8 +141,12 @@ q3_table_min30.sort_values(by='AVG', ascending=False, inplace=True)
 q3_table_min30.to_csv("Assignment_02/Question_3a.csv")
 q3a_name = q3_table_min30.iloc[0].loc["Player"]
 q3a_pos = q3_table_min30.iloc[0].loc["Pos"]
-
-
+#q3b
+q3_table_out = pd.DataFrame(q3_table.loc[[i in ['RF', 'CF', 'LF'] for i in q3_table["Pos"]]])
+q3_table_out.sort_values(by='AVG', ascending=False, inplace=True)
+q3_table_out.to_csv("Assignment_02/Question_3b.csv")
+q3b_name = q3_table_out.iloc[0].loc["Player"]
+q3b_pos = q3_table_out.iloc[0].loc["Pos"]
 
 
 
@@ -155,3 +159,4 @@ print('Question 1: The team is "{}"'.format(answer_one))
 print('Question 2a: The league is {} (avg home runs: {})'.format(answer_two_a_name, answer_two_a_avg))
 print('Question 2b: The league is {} (avg home runs: {})'.format(answer_two_b_name, answer_two_b_avg))
 print('Question 3a: The player is {} (position: {})'.format(q3a_name, q3a_pos))
+print('Question 3b: The player is {} (position: {})'.format(q3b_name, q3b_pos))
