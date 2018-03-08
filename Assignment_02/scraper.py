@@ -133,7 +133,8 @@ Select(game_type_selector).select_by_visible_text('Select Split')#.select_by_val
 sleep(random()+0.1)
 home_run_sorter = driver.find_element_by_id('datagrid').find_element_by_tag_name('thead').find_element_by_class_name('dg-ops')
 home_run_sorter.click() #this works but it's uncessesary
-#
+#?? why the errors here?
+sleep(random()+0.05)
 question_3_a_table = driver.find_element_by_id('datagrid').find_element_by_tag_name('table')
 q3_table = get_table(question_3_a_table)
 q3_table_min30 = pd.DataFrame(q3_table.loc[[int(i)>=30 for i in q3_table["AB"]]])
