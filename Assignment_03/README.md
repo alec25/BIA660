@@ -6,7 +6,8 @@ I pledge my honor that I have abided by the Stevens Honor System
 ### Extra
 
 Conda environment included:\
-spacy nltk jupyter requests selenium beautifulsoup4 tensorflow keras
+spacy nltk jupyter requests selenium beautifulsoup4 tensorflow 
+keras pandas scikit-learn
 
 Also ran:\
 pip install msgpack-python==0.5.4\
