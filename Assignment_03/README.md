@@ -15,3 +15,9 @@ python -m spacy download en\
 pip install pycorenlp\
 conda install scikit-learn
 
+page num: 84
+review count: 831
+review count: 832
+review count: 833
+Done
+(833, 7)
