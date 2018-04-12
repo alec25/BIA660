@@ -15,6 +15,7 @@ import pandas as pd
 url = "https://www.amazon.com/RockBirds-Flashlights-Bright-Aluminum-Flashlight/product-reviews/B00X61AJYM"
 driver = webdriver.Chrome(executable_path="chromedriver.exe")# "Assignment_03/chromedriver.exe"
 # driver = webdriver.Chrome(executable_path="Assignment_03/chromedriver.exe") #for running in console
+driver.implicitly_wait(10)
 driver.get(url=url)
 print("Loading page....")
 sleep(0.75) # WAIT WAIT WAIT
@@ -30,7 +31,7 @@ rated_filter.click()
 sleep(0.05 + random())
 rated_filter = driver.find_element_by_id("sort-order-dropdown")
 Select(rated_filter).select_by_value("recent")
-sleep(0.15 + random())
+sleep(1 + random())
 # Harvest Reviews
 # review_section = driver.find_element_by_id("cm_cr-review_list").find_elements_by_class_name("review") #"a-section review"
 df = pd.DataFrame(columns=["stars", "title", "author", "date", "body", "style", "helpful"])
@@ -42,7 +43,7 @@ while (done==False): #& page_num <= 4
     print("page num: " + str(page_num))
 
     review_section = driver.find_element_by_id("cm_cr-review_list").find_elements_by_class_name("review")  # "a-section review"
-    sleep(0.1 + random())
+    sleep(0.35 + 3* random())
     for review in review_section:
         review_count += 1
         stars = int(review.find_element_by_class_name("a-link-normal").get_attribute("title")[0]) # first char is the #stars
@@ -76,7 +77,7 @@ while (done==False): #& page_num <= 4
     next_button = driver.find_element_by_class_name("a-last") #.find_element_by_class_name("a-form-actions")
     # sleep(0.05 + random())
     next_button.click()
-    sleep(0.3 + random())
+    sleep(1 + 3*random())
     page_num += 1
 print("Done")
 print(df.shape)
