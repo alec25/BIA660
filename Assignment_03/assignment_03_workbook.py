@@ -1,5 +1,6 @@
 # Import Statements
 import pandas as pd
+import numpy as np
 from datetime import datetime
 
 # Data I/O
@@ -28,8 +29,8 @@ total_word_counts = [sum(word_count) for word_count in zip(*x_train.toarray())]
 word_frequencies = dict(zip(vectorizer.get_feature_names(), total_word_counts))
 most_frequent_term = max(word_frequencies, key = word_frequencies.get)
 print("The most frequent term is '" + most_frequent_term + "' and it occurs " + str(word_frequencies[most_frequent_term]) + " times in the training corpus.")
-import plotly.plotly as py
-from plotly.graph_objs import *
+# import plotly.plotly as py #TODO: remove
+# from plotly.graph_objs import * #TODO: remove
 # import plotly.graph_objs as go
 top_indexes = [i for i, x in enumerate(y_train) if x>=4]
 bot_indexes = [i for i, x in enumerate(y_train) if x<4]
@@ -42,9 +43,12 @@ bot_word_counts = [sum(word_count) for word_count in zip(*bot_reviews)]
 top_bot_word_counts = pd.DataFrame({"word": vectorizer.get_feature_names(), "top": top_word_counts, "bot": bot_word_counts})
 top_bot_word_counts.sort_values('top', ascending=False)[:5]
 top_bot_word_counts.sort_values('bot', ascending=False)[:5]
-import cufflinks as cf
-cf.set_config_file(offline=True, world_readable=True, theme='ggplot') #revise this
-top_bot_word_counts.sort_values('top', ascending=False)[:5].iplot(kind='bar', filename='cufflinks/grouped-bar-chart')
+# import cufflinks as cf #TODO: remove
+# cf.set_config_file(offline=True, world_readable=True, theme='ggplot') #revise this #TODO: remove
+a = top_bot_word_counts.sort_values('top', ascending=False)[:5]
+import matplotlib.pyplot as plt
+top_bot_word_counts.sort_values('top', ascending=False)[:5].plot.bar()
+# top_bot_word_counts.sort_values('top', ascending=False)[:5].iplot(kind='bar', filename='cufflinks/grouped-bar-chart')
 # top_bar = go.Bar(
 #     x = top_bot_word_counts.sort_values('top', ascending=False)[:5]
 # )
