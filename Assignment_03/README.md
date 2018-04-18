@@ -20,6 +20,9 @@ python -m spacy download en\
 pip install pycorenlp\
 conda install scikit-learn
 conda install -c conda-forge matplotlib 
+conda install matplotlib=2.1.2 (Errors with latest version of matplotlib in Pycharm)
+conda install plotly
+conda uninstall matplotlib
 
 
 page num: 84
