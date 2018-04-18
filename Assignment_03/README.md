@@ -24,6 +24,8 @@ conda install matplotlib=2.1.2 (Errors with latest version of matplotlib in Pych
 conda install plotly
 conda uninstall matplotlib
 conda install matplotlib
+conda install matplotlib=2.1.2
+conda install matplotlib
 
 
 page num: 84

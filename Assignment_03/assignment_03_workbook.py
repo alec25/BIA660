@@ -42,15 +42,15 @@ bot_word_counts = [sum(word_count) for word_count in zip(*bot_reviews)]
 # top_word_frequencies = dict(zip(vectorizer.get_feature_names(), top_word_counts))
 # bot_word_frequencies = dict(zip(vectorizer.get_feature_names(), bot_word_counts))
 top_bot_word_counts = pd.DataFrame({"word": vectorizer.get_feature_names(), "top": top_word_counts, "bot": bot_word_counts})
-top_bot_word_counts.sort_values('top', ascending=False)[:5]
-top_bot_word_counts.sort_values('bot', ascending=False)[:5]
+# top_bot_word_counts.sort_values('top', ascending=False)[:5]
+# top_bot_word_counts.sort_values('bot', ascending=False)[:5]
 # import cufflinks as cf #TODO: remove
 # cf.set_config_file(offline=True, world_readable=True, theme='ggplot') #revise this #TODO: remove
-a = top_bot_word_counts.sort_values('top', ascending=False)[:5].set_index('word')
 b = top_bot_word_counts.sort_values('bot', ascending=False)[:5].set_index('word')
-import matplotlib.pyplot as plt
+a = top_bot_word_counts.sort_values('top', ascending=False)[:5].set_index('word')
+# import matplotlib.pyplot as plt
 
-a.append(b).drop_duplicates().plot.bar()
+# a.append(b).drop_duplicates().plot.bar()
 # top_bot_word_counts.sort_values('top', ascending=False)[:5].iplot(kind='bar', filename='cufflinks/grouped-bar-chart')
 # top_bar = go.Bar(
 #     x = top_bot_word_counts.sort_values('top', ascending=False)[:5]
