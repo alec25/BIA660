@@ -9,6 +9,10 @@ Conda environment included:\
 spacy nltk jupyter requests selenium beautifulsoup4 tensorflow 
 keras pandas scikit-learn
 
+For **nltk**, within Pycharm Python console: 
+nltk.download('punkt'), nltk.download('stopwords')
+
+
 Also ran:\
 pip install msgpack-python==0.5.4\
 python -m spacy download en\
