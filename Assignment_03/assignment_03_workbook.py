@@ -29,6 +29,7 @@ word_frequencies = dict(zip(vectorizer.get_feature_names(), total_word_counts))
 most_frequent_term = max(word_frequencies, key = word_frequencies.get)
 print("The most frequent term is '" + most_frequent_term + "' and it occurs " + str(word_frequencies[most_frequent_term]) + " times in the training corpus.")
 import plotly.plotly as py
+from plotly.graph_objs import *
 # import plotly.graph_objs as go
 top_indexes = [i for i, x in enumerate(y_train) if x>=4]
 bot_indexes = [i for i, x in enumerate(y_train) if x<4]
