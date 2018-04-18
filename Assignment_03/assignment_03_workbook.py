@@ -1,6 +1,7 @@
 # Import Statements
-import pandas as pd
+import pandas as pd #matplotlib support failed
 import numpy as np
+# %matplotlib inline  #breaks
 from datetime import datetime
 
 # Data I/O
@@ -45,9 +46,11 @@ top_bot_word_counts.sort_values('top', ascending=False)[:5]
 top_bot_word_counts.sort_values('bot', ascending=False)[:5]
 # import cufflinks as cf #TODO: remove
 # cf.set_config_file(offline=True, world_readable=True, theme='ggplot') #revise this #TODO: remove
-a = top_bot_word_counts.sort_values('top', ascending=False)[:5]
+a = top_bot_word_counts.sort_values('top', ascending=False)[:5].set_index('word')
+b = top_bot_word_counts.sort_values('bot', ascending=False)[:5].set_index('word')
 import matplotlib.pyplot as plt
-top_bot_word_counts.sort_values('top', ascending=False)[:5].plot.bar()
+
+a.append(b).drop_duplicates().plot.bar()
 # top_bot_word_counts.sort_values('top', ascending=False)[:5].iplot(kind='bar', filename='cufflinks/grouped-bar-chart')
 # top_bar = go.Bar(
 #     x = top_bot_word_counts.sort_values('top', ascending=False)[:5]
