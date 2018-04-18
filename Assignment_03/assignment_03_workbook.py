@@ -10,13 +10,38 @@ data = pd.read_json("Assignment_03/reviews.json") # Data import
 data['date'] = data['date'].apply(lambda x: datetime.fromordinal(x)) # Date conversion
 
 # Basic Analysis
-import string
 # from nltk import ngrams
 from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.model_selection import train_test_split
+# Extract the simple dependent and independent variables from the dataframe
 body_list = data['body'].tolist()
-vectorizer = CountVectorizer(loweracase=True, strip_accents='ascii', stop_words='english')
-#analyzer='word', ngram_range=(1,1), max_df=1.0 or 1, min_df=1.0 or 1, max_features=?int, binary=False,
-list(ngrams(body_list, n=1))
+rating_list = data['stars'].tolist()
+# Split into training data and test data
+x_train, x_test, y_train, y_test = train_test_split(body_list, rating_list, test_size=0.2, random_state=1)
+# Fit vectorizer to training data
+vectorizer = CountVectorizer(lowercase=True, strip_accents='ascii', stop_words='english', min_df=0.01)
+#analyzer='word', ngram_range=(1,1), max_df=1.0 or 1, min_df=1.0 or 1, max_features=?int, binary=False, #KEEP THIS IN
+vectorizer = vectorizer.fit(x_train)
+# Transform training and test dataset using the vectorizer
+x_train = vectorizer.transform(x_train) #just do .toarray() here?
+x_test = vectorizer.transform(x_test)
+vectorizer.get_feature_names()
+# len(vectorizer.get_feature_names())
+total_word_counts = [sum(word_count) for word_count in zip(*x_train.toarray())]
+word_frequencies = dict(zip(vectorizer.get_feature_names(), total_word_counts))
+most_frequent_term = max(word_frequencies, key = word_frequencies.get)
+print("The most frequent term is '" + most_frequent_term + "' and it occurs " + str(word_frequencies[most_frequent_term]) + " times in the training corpus.")
+
+# x_train.data.tolist()
+vector = vectorizer.fit([temp])
+vector.tr
+a = vectorizer.transform([temp])
+vector = vectorizer.fit_transform([temp])
+vector.toarray()
+vectorizer.get_feature_names()
+type(vector)
+
+# list(ngrams(body_list, n=1))
 
 # New Features
 import string
