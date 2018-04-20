@@ -26,6 +26,8 @@ conda uninstall matplotlib
 conda install matplotlib
 conda install matplotlib=2.1.2
 conda install matplotlib
+pip install pyspellchecker
+pip install autocorrect
 
 
 page num: 84
