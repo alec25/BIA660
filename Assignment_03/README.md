@@ -28,6 +28,7 @@ conda install matplotlib=2.1.2
 conda install matplotlib
 pip install pyspellchecker
 pip install autocorrect
+pip install imblearn
 
 
 page num: 84

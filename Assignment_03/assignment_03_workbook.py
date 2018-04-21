@@ -102,14 +102,65 @@ word_list = list(map(str.split, texts))
 from nltk.stem.snowball import EnglishStemmer # Also turns the text lowercase
 #nltk..wordnet.WordNetLemmatizer() #maybe?!?!?!
 stemmer = EnglishStemmer(ignore_stopwords=True) #ignore_stopwords=False
-stemmed_list = list(map(lambda x: [stemmer.stem(w) for w in x], word_list))
+stemmed_word_list = list(map(lambda x: [stemmer.stem(w) for w in x], word_list))
+stemmed_list = list(map(lambda x: ' '.join(x), stemmed_word_list))
 tfidf = TfidfVectorizer(lowercase=True, stop_words='english', norm=None, use_idf=False, max_df=0.99, min_df=2)
 
+#now the thing
+texts1, texts2, data1, data2, stars1, stars2 = train_test_split(stemmed_list, data, stars, test_size=0.15, random_state=1)
+# texts1, data1, stars1, texts2, data2, stars2 = train_test_split(texts, data, stars, test_size=0.15, random_state=1)
+tfidf.fit(texts1)
+tf1 = tfidf.transform(texts1)
+tf2 = tfidf.transform(texts2)
+# x_train, x_test, y_train, y_test = train_test_split(body_list, rating_list, test_size=0.2, random_state=1)
+# ok cool now we have all our training data
+tf1 = pd.DataFrame(tf1.toarray(), index=data1.axes[0])
+tf2 = pd.DataFrame(tf2.toarray(), index=data2.axes[0])
+data_in1 = pd.concat([data1, tf1], axis=1)
+data_in2 = pd.concat([data2, tf2], axis=1)
+#now lets try simple regression
+from sklearn.linear_model import Lasso
+lasso = Lasso(alpha=0.1)
+lasso.fit(data_in1, stars1)
+# features_used1 = len(lasso.coef_) - lasso.coef_.tolist().count(0) #6
+signifigant_features = data_in1.dtypes.index[[i for i, j in enumerate(lasso.coef_) if j != 0]]
+sig_words = [tfidf.get_feature_names()[i] for i in signifigant_features[2:]]
+print(', '.join(signifigant_features[:2])+' | '+', '.join(sig_words))
+# Since Lasso only gives us 6 indicator variables (with an Lambda or "alpha" of 0.1, with the default value of 1
+#we get 0 indicator variables. We can see that the model selected 4 of the word vectors and also the number of
+#people that found the review helpful, and the number of numbers in the reviews text or title. The accuracy of the
+#Lasso regression was embarrasingly low and so was not included here.
+from sklearn.neural_network import MLPClassifier
+mlp = MLPClassifier()
+mlp.fit(data1, stars1)
+def per(x): return(str(round(100*x,2))+'%')
+print(per(mlp.score(data1, stars1))+' training accuracy, '+per(mlp.score(data2, stars2))+' testing accuracy')
+#now we redo stuff and try SMOTE over-sampling
+from imblearn.over_sampling import SMOTE
+# mlp.score(data1, stars1)
+# mlp.score(data2, stars2)
 
-stemmed = [stemmer.stem(word) for word in tokens]
+# mlp.predict(data1)
+
+
+
+# lr1.fit(data_in1, stars1); lr2.fit(x_train, binary_train)
+words_used1 = len(lr1.coef_[0]) - lr1.coef_[0].tolist().count(0)
+words_used2 = len(lr2.coef_[0]) - lr2.coef_[0].tolist().count(0)
+
+print(str(words_used1)+' words used in the L1 regression w/ accuracy: '+
+      str(round(100 * lr1.score(x_test, binary_test), 2))+'%, '+
+      str(words_used2)+' words used in the L2 regression w/ accuracy: '+
+      str(round(100 * lr2.score(x_test, binary_test), 2)))
+lr1.score(x_train, binary_train)
+lr2.score(x_train, binary_train)
+# stemmed = [stemmer.stem(word) for word in tokens]
 
 
 data.head(3)
+
+
+
 
 
 
