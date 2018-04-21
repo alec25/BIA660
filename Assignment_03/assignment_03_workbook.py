@@ -131,12 +131,21 @@ print(', '.join(signifigant_features[:2])+' | '+', '.join(sig_words))
 #people that found the review helpful, and the number of numbers in the reviews text or title. The accuracy of the
 #Lasso regression was embarrasingly low and so was not included here.
 from sklearn.neural_network import MLPClassifier
-mlp = MLPClassifier()
-mlp.fit(data1, stars1)
+mlp = MLPClassifier() #
+mlp.fit(data1, stars1) #data1 whoops was using this
 def per(x): return(str(round(100*x,2))+'%')
 print(per(mlp.score(data1, stars1))+' training accuracy, '+per(mlp.score(data2, stars2))+' testing accuracy')
+mlp = MLPClassifier() #
+mlp.fit(data_in1, stars1) #data1 whoops was using this
+print(per(mlp.score(data_in1, stars1))+' training accuracy, '+per(mlp.score(data_in2, stars2))+' testing accuracy')
 #now we redo stuff and try SMOTE over-sampling
 from imblearn.over_sampling import SMOTE
+sm = SMOTE()
+new_data_in1, new_stars1 = sm.fit_sample(data_in1, stars1)
+mlp = MLPClassifier() #
+mlp.fit(new_data_in1, new_stars1) #well its taking quite a bit longer now lol
+print(per(mlp.score(new_data_in1, new_stars1))+' training accuracy, '+per(mlp.score(data_in2, stars2))+' testing accuracy')
+(len(new_data_in1)-len(data_in1))/len(data_in1)
 # mlp.score(data1, stars1)
 # mlp.score(data2, stars2)
 
