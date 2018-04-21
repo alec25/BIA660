@@ -146,10 +146,30 @@ mlp = MLPClassifier() #
 mlp.fit(new_data_in1, new_stars1) #well its taking quite a bit longer now lol
 print(per(mlp.score(new_data_in1, new_stars1))+' training accuracy, '+per(mlp.score(data_in2, stars2))+' testing accuracy')
 (len(new_data_in1)-len(data_in1))/len(data_in1)
-# mlp.score(data1, stars1)
-# mlp.score(data2, stars2)
+# Now I guess we try regular over-sampling
+from imblearn.over_sampling import RandomOverSampler
+naive = RandomOverSampler(random_state=1, ratio="minority")
+new_data_in1, new_stars1 = naive.fit_sample(data_in1, stars1) #do it for first undersampled class
+new_data_in1, new_stars1 = naive.fit_sample(new_data_in1, new_stars1) #second
+new_data_in1, new_stars1 = naive.fit_sample(new_data_in1, new_stars1) #third
+new_data_in1, new_stars1 = naive.fit_sample(new_data_in1, new_stars1) #fourth
+mlp = MLPClassifier() #
+mlp.fit(new_data_in1, new_stars1)
+print(per(mlp.score(new_data_in1, new_stars1))+' training accuracy, '+per(mlp.score(data_in2, stars2))+' testing accuracy')
+(len(new_data_in1)-len(data_in1))/len(data_in1)
+# next level smote
+sm = SMOTE()
+new_data_in1, new_stars1 = sm.fit_sample(data_in1, stars1)
+new_data_in1, new_stars1 = sm.fit_sample(new_data_in1, new_stars1) #second
+new_data_in1, new_stars1 = sm.fit_sample(new_data_in1, new_stars1) #third
+new_data_in1, new_stars1 = sm.fit_sample(new_data_in1, new_stars1) #fourth
+mlp = MLPClassifier() #
+mlp.fit(new_data_in1, new_stars1) #well its taking quite a bit longer now lol
+print(per(mlp.score(new_data_in1, new_stars1))+' training accuracy, '+per(mlp.score(data_in2, stars2))+' testing accuracy')
+(len(new_data_in1)-len(data_in1))/len(data_in1)
 
-# mlp.predict(data1)
+
+
 
 
 
