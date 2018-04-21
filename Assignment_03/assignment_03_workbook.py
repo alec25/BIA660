@@ -38,6 +38,7 @@ top_bot_word_counts = pd.DataFrame({"word": vectorizer.get_feature_names(), "pos
 top_bot_most = top_bot_word_counts.sort_values('positive_review')[-5:][::-1].append(top_bot_word_counts.sort_values('negative_review')[-5:][::-1]).set_index('word')
 # import matplotlib.pyplot as plt # KEEP
 # top_bot_most.drop_duplicates().plot.bar() # KEEP
+# Maybe try knn also for this?
 
 # Now the model
 from sklearn.linear_model import LogisticRegression
@@ -59,38 +60,81 @@ print(str(words_used1)+' words used in the L1 regression w/ accuracy: '+
 ### More advanced training
 # onehot_style = pd.DataFrame(preprocessing.label_binarize(data['style'], classes = data['style'].unique())).loc[:,1:2] #Keep
 data_backup = data
+#
+data = data_backup
 from sklearn import preprocessing
+# Styles to Int
 le = preprocessing.LabelEncoder()
 le.fit(data['style'])
 data['style'] = le.transform(data['style'])
-data['author'] = [1 if x=='Amazon Customer' else 0 for x in data['author']]
-# round(100*sum([1 if 'stars' in x.lower() else 0 for x in data['title']])/len(data['title']),2)
+# Author
+data['author'] = [1 if x=='Amazon Customer' else 0 for x in data['author']] #maybe 0 for 'amazon customer' else num names?
+# Text = Title + " " + Body
+data['text'] = pd.Series(data['title'] + " " + data['body'])
+data = data.drop(columns=['title', 'body'])
+# Normalize Dates
+data['date'] = data['date'].apply(datetime.toordinal)
+data['date'] = data['date'] - min(data['date'])
+data['date'] = data['date'] / max(data['date'])
+#
+from autocorrect import spell
+import re
+raw_texts = data['text'].tolist()
+# new_backup = data
+def process_text(review_text):
+    digits = sum(1 for let in review_text if let.isdigit())
+    no_contractions = re.sub("[']+", "", review_text)
+    clean_text = re.sub("[!\"#$%&()*+,\-./:;<=>?@[\]^_`\\{|}~]|(\n)|[0-9]+", ' ', no_contractions)
+    new_text = list(map(spell, clean_text.split()))
+    differences = sum([1 for a, b in zip(new_text, clean_text.split()) if a != b])
+    return ' '.join(new_text), digits, differences
+# list(map(process_text, raw_texts))
+texts, numbers, typos = zip(*list(map(process_text, raw_texts)))
+# data['text'] = pd.Series(texts)
+data['numbers'] = pd.Series(numbers)
+data['typos'] = pd.Series(typos)
+stars = data['stars']
+data = data.drop(columns=['text', 'stars'])
+# Now for TfIdf #texts
+from sklearn.feature_extraction.text import TfidfVectorizer
+word_list = list(map(str.split, texts))
+# word_list = [word_tokenize(x) for x in texts] #seems slightly slower
+from nltk.stem.snowball import EnglishStemmer # Also turns the text lowercase
+#nltk..wordnet.WordNetLemmatizer() #maybe?!?!?!
+stemmer = EnglishStemmer(ignore_stopwords=True) #ignore_stopwords=False
+stemmed_list = list(map(lambda x: [stemmer.stem(w) for w in x], word_list))
+tfidf = TfidfVectorizer(lowercase=True, stop_words='english', norm=None, use_idf=False, max_df=0.99, min_df=2)
+
+
+stemmed = [stemmer.stem(word) for word in tokens]
 
 
 data.head(3)
 
 
 
-training_data, test_data = train_test_split(data, test_size=0.2, random_state=1)
-# Feature Creation
-from sklearn import preprocessing
-preprocessing.label_binarize(data['style'], classes = data['style'].unique())
-ohe.fit(data['style'])
-# data['style'].unique()
-body_list = data['body'].tolist()
-rating_list = data['stars'].tolist()
-
-
-from autocorrect import spell
-spell('the')
 
 
 
+# ('One Star Already no longer working after minimal use', 0, 0),
+# ('Five Stars Great little flashlights', 0, 0)]
 
-# set_train = pd.DataFrame(np.matrix(x_train.toarray()))
-# set_train = set_train.join(pd.DataFrame({'out': binary_train}))
-# # set_train.head(3)
-# set_test =
+review_text = data['text'].tolist()[0]
+digits = sum(1 for let in review_text if let.isdigit())
+no_contractions = re.sub("[']+", "", review_text)
+clean_text = re.sub("[!\"#$%&()*+,\-./:;<=>?@[\]^_`\\{|}~]|(\n)|[0-9]+", ' ', no_contractions)
+new_text = list(map(spell, clean_text.split()))
+differences = sum([1 for a, b in zip(new_text, clean_text.split()) if a != b])
+#
+data.head(3)
+# round(100*sum([1 if 'stars' in x.lower() else 0 for x in data['title']])/len(data['title']),2)
+for a, b in zip(new_text, clean_text.split()): print(a+ " - " + b)
+sum(1 for let in review_text if let.isdigit())
+
+
+
+
+
 
 
 
@@ -116,10 +160,10 @@ temp
 # import string
 # punctuation_translator = str.maketrans('0123456789', 'XXXXXXXXXX', string.punctuation+"\n") #?
 # temp.translate(punctuation_translator)
-
 "[!\"#$%&'()*+,\-./:;<=>?@[\]^_`\\{|}~]"
-re.sub("[!\"#$%&()*+,\-./:;<=>?@[\]^_`\\{|}~]|(\n)+", ' ', temp) #removed " ' " #.sub('[0-9]+', "#", temp)
-
+       "[!\"#$%&'()*+,\-./:;<=>?@[\]^_`\\{|}~]"
+re.sub("[!\"#$%&'()*+,\-./:;<=>?@[\]^_`\\{|}~]|(\n)+", ' ', temp) #removed " ' " #.sub('[0-9]+', "#", temp)
+#               '
 data['num_chars'] = data['title'].apply(len) + data['body'].apply(len)
 a.head(3)
 # Data Manipulation/Tokenization
@@ -132,11 +176,12 @@ body_list = data['body']
 
 
 # import string #is this even still necessary?
-temp = data['body'][0] #TODO: remove, this is just for testing
+temp = texts[0:3] #TODO: remove, this is just for testing
 from nltk import sent_tokenize, word_tokenize, wordpunct_tokenize # Tokenizers# import nltk
-sent_temp = sent_tokenize(temp)
+# sent_temp = sent_tokenize(temp)
 word_temp = word_tokenize(sent_temp[0])
-[word_tokenize(x) for x in sent_temp] #...in [sent_temp[0]] ]
+# list(map(str.split, temp)) == [word_tokenize(x) for x in temp]
+[word_tokenize(x) for x in temp] #...in [sent_temp[0]] ]
 # nltk.wordpunct_tokenize(sent_temp[0]) #not sure about the difference, "It 's" -> "It ' s"; "I 'll" -> "I ' ll"?
 
 #To compare them:
