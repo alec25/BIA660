@@ -158,17 +158,25 @@ mlp.fit(new_data_in1, new_stars1)
 print(per(mlp.score(new_data_in1, new_stars1))+' training accuracy, '+per(mlp.score(data_in2, stars2))+' testing accuracy')
 (len(new_data_in1)-len(data_in1))/len(data_in1)
 # next level smote
-sm = SMOTE()
+sm = SMOTE(k_neighbors=10, m_neighbors=20, random_state=42)
 new_data_in1, new_stars1 = sm.fit_sample(data_in1, stars1)
 new_data_in1, new_stars1 = sm.fit_sample(new_data_in1, new_stars1) #second
 new_data_in1, new_stars1 = sm.fit_sample(new_data_in1, new_stars1) #third
 new_data_in1, new_stars1 = sm.fit_sample(new_data_in1, new_stars1) #fourth
-mlp = MLPClassifier() #
+mlp = MLPClassifier(random_state=42) #
 mlp.fit(new_data_in1, new_stars1) #well its taking quite a bit longer now lol
+print(per(mlp.score(new_data_in1, new_stars1))+' training accuracy, '+per(mlp.score(data_in2, stars2))+' testing accuracy') #99.78%  69.6%
+print((len(new_data_in1)-len(data_in1))/len(data_in1))
+# develop this a bit more
+mlp = MLPClassifier(solver='lbfgs', random_state=42) #'lbfgs' reccomended by scikit-learn for small datasets
+mlp.fit(new_data_in1, new_stars1)
 print(per(mlp.score(new_data_in1, new_stars1))+' training accuracy, '+per(mlp.score(data_in2, stars2))+' testing accuracy')
-(len(new_data_in1)-len(data_in1))/len(data_in1)
-
-
+print((len(new_data_in1)-len(data_in1))/len(data_in1))
+#another
+mlp = MLPClassifier(activation='tanh', random_state=42) #'lbfgs' reccomended by scikit-learn for small datasets
+mlp.fit(new_data_in1, new_stars1)
+print(per(mlp.score(new_data_in1, new_stars1))+' training accuracy, '+per(mlp.score(data_in2, stars2))+' testing accuracy')
+#sldjs
 
 
 
