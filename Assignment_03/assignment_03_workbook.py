@@ -173,7 +173,7 @@ mlp.fit(new_data_in1, new_stars1)
 print(per(mlp.score(new_data_in1, new_stars1))+' training accuracy, '+per(mlp.score(data_in2, stars2))+' testing accuracy')
 print((len(new_data_in1)-len(data_in1))/len(data_in1))
 #another
-mlp = MLPClassifier(beta_2=0.9, random_state=42)
+mlp = MLPClassifier(tol=0.0002, random_state=42)
 mlp.fit(new_data_in1, new_stars1)
 print(per(mlp.score(new_data_in1, new_stars1))+' training accuracy, '+per(mlp.score(data_in2, stars2))+' testing accuracy')
 #sldjs
