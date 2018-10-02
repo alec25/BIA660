@@ -3,5 +3,7 @@
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/../BIA660D_Group_1_Project" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../OpenAI_Gym" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../open.ai.gym" vcs="Git" />
   </component>
 </project>

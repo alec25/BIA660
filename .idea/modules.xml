@@ -4,7 +4,9 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/BIA660.iml" filepath="$PROJECT_DIR$/.idea/BIA660.iml" />
       <module fileurl="file://$PROJECT_DIR$/../BIA660D_Group_1_Project/.idea/BIA660D_Group_1_Project.iml" filepath="$PROJECT_DIR$/../BIA660D_Group_1_Project/.idea/BIA660D_Group_1_Project.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../OpenAI_Gym/.idea/OpenAI_Gym.iml" filepath="$PROJECT_DIR$/../OpenAI_Gym/.idea/OpenAI_Gym.iml" />
       <module fileurl="file://$PROJECT_DIR$/../SchoolMisc/.idea/SchoolMisc.iml" filepath="$PROJECT_DIR$/../SchoolMisc/.idea/SchoolMisc.iml" />
+      <module fileurl="file://$USER_HOME$/Dropbox (Personal)/PythonFolder/text_sender/.idea/text_sender.iml" filepath="$USER_HOME$/Dropbox (Personal)/PythonFolder/text_sender/.idea/text_sender.iml" />
     </modules>
   </component>
 </project>

@@ -6,6 +6,8 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="BIA660D_Group_1_Project" />
     <orderEntry type="module" module-name="SchoolMisc" />
+    <orderEntry type="module" module-name="text_sender" />
+    <orderEntry type="module" module-name="OpenAI_Gym" />
   </component>
   <component name="TestRunnerService">
     <option name="PROJECT_TEST_RUNNER" value="Unittests" />
